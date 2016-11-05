@@ -160,13 +160,23 @@ void descentPlaneEmbedding(int n,
       embedding[i].second += offsets[i].second;
     }
 
-    
+    // this could be turned on by setting the `trace`
+    // variable at the top to true. This will print out
+    // not just the final embedding, but the positions
+    // of the points at every timestep, useful for
+    // showing trails of the motion in the final plot
     if(trace){
       for(auto & e : embedding)
 	cout<< e.first << " " << e.second<<"\n"; 
       cout<<"\n\n";
     }
-    cerr<<"..\n";
+
+    // print out the current percentage at 10% steps
+    if (iterations >= 10){
+      if(it % (iterations/10) == 0 && it >= iterations/10){
+	cerr<<it*100/iterations << "% done \n";
+      }
+    }
   }
   
 }
@@ -175,10 +185,14 @@ int main(int argc, char* argv[])
 {
 
   int iterations;
-  istringstream(argv[1]) >> iterations;
-  double stepFactor = 0.0001;
-  double distScale = 0.1;
+  if(argc > 1){
+    istringstream(argv[1]) >> iterations;
+  }else{
+    iterations = 500;
+  }
   
+  double stepFactor = 0.001;
+  double distScale = 0.1;
   
   srand(time(NULL));
   
@@ -189,23 +203,22 @@ int main(int argc, char* argv[])
     cin >> s;
   }
 
+  cerr<<"Building distance matrix..\n";
+  
   vector<vector<int> > distanceMatrix = buildDistanceMatrix(n, strings);
 
-  cerr<<"Distance matrix done!\n";
+  cerr<<"Distance matrix done, starting embedding with " << iterations << " iterations.\n";
   
-  /*for(int i = 0; i < n; ++i){
-    for(auto & a:distanceMatrix[i]){
-      cout<< a<< " ";
-    }
-    cout<<"\n";
-    }*/
-
   vector<pair<double, double> > embedding (n);
 
+  // initialize the embedding with random values
   randomizeEmbedding(n, embedding);
 
+  // adjust the embedding iteratively by gradient descent
   descentPlaneEmbedding(n, embedding, distanceMatrix, iterations, stepFactor, distScale);
 
+
+  // print out the final embedding as "x y"
   for(auto & e : embedding)
     cout<< e.first << " " << e.second<<"\n"; 
 
