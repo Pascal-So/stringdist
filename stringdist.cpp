@@ -2,6 +2,7 @@
 using namespace std;
 
 bool trace = false;
+bool verbose = true;
 
 // implementing an algorithm to map out
 // words on a plane, grouping similar
@@ -60,6 +61,13 @@ vector<vector<int> > buildDistanceMatrix(int n, vector<string> strings)
       int dist = stringdist(strings[i], strings[j]);
       dists[i][j] = dist;
       dists[j][i] = dist;
+    }
+
+    // print out the current percentage at 20% steps
+    if (verbose && n >= 10){
+      if(i % (n/5) == 0 && i >= n/10){
+	cerr<<i*100/n << "% done \n";
+      }
     }
   }
 
@@ -172,7 +180,7 @@ void descentPlaneEmbedding(int n,
     }
 
     // print out the current percentage at 10% steps
-    if (iterations >= 10){
+    if (verbose && iterations >= 10){
       if(it % (iterations/10) == 0 && it >= iterations/10){
 	cerr<<it*100/iterations << "% done \n";
       }
@@ -191,23 +199,25 @@ int main(int argc, char* argv[])
     iterations = 500;
   }
   
-  double stepFactor = 0.001;
+  double stepFactor = 0.0002;
   double distScale = 0.1;
+  
   
   srand(time(NULL));
   
-  int n;
-  cin >> n;
-  vector<string> strings (n);
-  for(auto & s:strings){
-    cin >> s;
+  vector<string> strings;
+  string s;
+  while(getline(cin, s)){
+    strings.push_back(s);
   }
 
-  cerr<<"Building distance matrix..\n";
+  int n = strings.size();
+  
+  if(verbose) cerr<<"Building " << n << "*" << n << " distance matrix..\n";
   
   vector<vector<int> > distanceMatrix = buildDistanceMatrix(n, strings);
-
-  cerr<<"Distance matrix done, starting embedding with " << iterations << " iterations.\n";
+  
+  if(verbose) cerr<<"Distance matrix done, starting embedding with " << iterations << " iterations.\n";
   
   vector<pair<double, double> > embedding (n);
 
